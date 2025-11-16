@@ -11,28 +11,26 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (builder.Environment.IsProduction() || Environment.GetEnvironmentVariable("USE_SQLITE") == "true")
-{
-    // Use SQLite for production/container
-    builder.Services.AddDbContext<ProductDbContext>(options =>
+builder.Services.AddDbContext<ProductDbContext>(options =>
         options.UseSqlite(connectionString));
-}
-else
-{
-    // Use SQL Server for local development
-    builder.Services.AddDbContext<ProductDbContext>(options =>
-        options.UseSqlServer(connectionString));
-}
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
-using (var scope = app.Services.CreateScope())
+try
 {
-    var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
-    db.Database.EnsureCreated();
-    db.Database.Migrate();
-    SeedData.Initialize(scope.ServiceProvider);
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+        db.Database.EnsureCreated();
+        db.Database.Migrate();
+        SeedData.Initialize(scope.ServiceProvider);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error while Migration: {ex.Message}");
+    throw;
 }
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -41,7 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
