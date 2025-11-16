@@ -11,8 +11,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ProductDbContext>(options =>
+
+if (string.IsNullOrEmpty(connectionString) || builder.Environment.IsProduction())
+{
+    connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+        ?? "Data Source=/app/data/Products.db";
+    builder.Services.AddDbContext<ProductDbContext>(options =>
         options.UseSqlite(connectionString));
+}
+else
+{
+    builder.Services.AddDbContext<ProductDbContext>(options =>
+        options.UseSqlite(connectionString));
+}
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 

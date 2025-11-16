@@ -20,6 +20,7 @@ EXPOSE 5151
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:5151
 ENV USE_SQLITE=true
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ConnectionStrings__DefaultConnection=Data Source=/app/data/Products.db
 
 ENTRYPOINT ["dotnet", "ProductsAPIForTechGig.dll"]
