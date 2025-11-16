@@ -20,7 +20,12 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+    db.Database.Migrate();
+    SeedData.Initialize(scope.ServiceProvider);
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
