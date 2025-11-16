@@ -17,6 +17,7 @@ namespace ProductsAPIForTechGig.Data
                 context.Products.AddRange(
                     [new Models.Domain.Product
                     {
+                        Id = 1,
                         ProductName = "Laptop",
                         ProductDescription = "Dell XPS 13",
                         Prize = 999.99M,
@@ -24,6 +25,7 @@ namespace ProductsAPIForTechGig.Data
                     },
                     new Models.Domain.Product
                     {
+                        Id = 2,
                         ProductName = "Smartphone",
                         ProductDescription = "iPhone 13",
                         Prize = 799.99M,
@@ -31,6 +33,7 @@ namespace ProductsAPIForTechGig.Data
                     },
                     new Models.Domain.Product
                     {
+                        Id = 3,
                         ProductName = "Headphones",
                         ProductDescription = "Sony WH-1000XM4",
                         Prize = 349.99M,
@@ -38,6 +41,7 @@ namespace ProductsAPIForTechGig.Data
                     },
                     new Models.Domain.Product
                     {
+                        Id = 4,
                         ProductName = "Coffee Maker",
                         ProductDescription = "Nespresso Vertuo",
                         Prize = 199.99M,

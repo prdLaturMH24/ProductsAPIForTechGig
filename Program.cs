@@ -22,7 +22,6 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
-        db.Database.EnsureCreated();
         db.Database.Migrate();
         SeedData.Initialize(scope.ServiceProvider);
     }
