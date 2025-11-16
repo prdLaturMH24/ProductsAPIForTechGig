@@ -14,11 +14,12 @@ RUN mkdir -p /app/data
 
 COPY --from=build /app/publish .
 
-# Expose port
-EXPOSE 7151
+# Expose port 5151 (matching launchSettings)
+EXPOSE 5151
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:7151
+ENV ASPNETCORE_URLS=http://+:5151
 ENV USE_SQLITE=true
+ENV ConnectionStrings__DefaultConnection=Data Source=/app/data/products.db
 
 ENTRYPOINT ["dotnet", "ProductsAPIForTechGig.dll"]
