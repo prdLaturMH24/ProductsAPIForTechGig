@@ -10,32 +10,28 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Allow environment variable to override configuration (useful for Docker).
+var envConnection = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+Console.Write("Environment ConnectionString:{0}", envConnection);
+var connectionString = !string.IsNullOrWhiteSpace(envConnection)
+    ? envConnection
+    : builder.Configuration.GetConnectionString("DefaultConnection")
+      ?? "Data Source=/app/data/Products.db";
 
-if (string.IsNullOrEmpty(connectionString) || builder.Environment.IsProduction())
-{
-    connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-        ?? "Data Source=/app/data/Products.db";
-    builder.Services.AddDbContext<ProductDbContext>(options =>
-        options.UseSqlite(connectionString));
-}
-else
-{
-    builder.Services.AddDbContext<ProductDbContext>(options =>
-        options.UseSqlite(connectionString));
-}
+connectionString = connectionString.Trim().Trim('"', '\'');
+
+builder.Services.AddDbContext<ProductDbContext>(options =>
+    options.UseSqlite(connectionString));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
 try
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
-        db.Database.Migrate();
-        SeedData.Initialize(scope.ServiceProvider);
-    }
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+    db.Database.Migrate();
+    SeedData.Initialize(scope.ServiceProvider);
 }
 catch (Exception ex)
 {
@@ -47,9 +43,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    // Only enable HTTPS redirection in Development where developer certificates
+    // are available. In containerized Production builds the app is configured
+    // to listen on plain HTTP (ASPNETCORE_URLS=http://+:5151) so redirecting
+    // to HTTPS would break requests.
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

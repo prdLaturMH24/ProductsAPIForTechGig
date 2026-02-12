@@ -1,8 +1,9 @@
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+COPY ./ProductsAPIForTechGig.csproj ./
+RUN dotnet restore 
 COPY . .
-RUN dotnet restore "./ProductsAPIForTechGig.csproj"
 RUN dotnet publish "./ProductsAPIForTechGig.csproj" -c Release -o /app/publish
 
 # Runtime stage
@@ -21,6 +22,6 @@ EXPOSE 5151
 ENV ASPNETCORE_URLS=http://+:5151
 ENV USE_SQLITE=true
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ConnectionStrings__DefaultConnection=Data Source=/app/data/Products.db
+ENV ConnectionStrings__DefaultConnection="Data Source=/app/data/Products.db"
 
 ENTRYPOINT ["dotnet", "ProductsAPIForTechGig.dll"]
